@@ -1,0 +1,231 @@
+---
+title: "Cancer_autoimmune meta-analysis"
+author: "Md Zohorul Islam"
+date: "15/08/2020"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r installing meta packages}
+
+#install dmetar package
+#if (!require("devtools")) {install.packages("devtools")}devtools::install_github("MathiasHarrer/dmetar")
+
+
+#install.packages(c("metafor", "meta", "weightr"))
+```
+
+```{r loading package}
+library(dmetar)
+library(metafor)
+library(meta)
+library(weightr)
+library(grid)
+```
+
+```{r reading in data}
+#reading data
+meta=read.csv("genus_raw.csv", header=T, sep=",")
+
+#vectoring data
+
+effect.size = c(meta$foldchange)
+p = c(meta$pvalue)
+N = c(meta$total)
+
+se <- se.from.p(effect.size = effect.size, p = p, N = N,
+    effect.size.type = "ratio")
+
+write.csv(se, file = "se.csv")
+
+#import new dataset 
+metase=read.csv("Genus_se_calculated.csv", header=T, sep=",")
+```
+
+
+```{r conducting inverse variance meta analysis_bacteroides}
+Bacteroides.dl <- metagen(logEffectSize,logStandardError,data=metase, subset = genus == "Bacteroides", byvar = Disease, studlab=paste(Authoryear), comb.fixed = FALSE, comb.random = TRUE, hakn = FALSE, prediction=FALSE, print.byvar = FALSE, sm="")
+
+
+pdf(file = "plot/Bacteroides2.PDF", width = 10, height = 5.1)
+forest(Bacteroides.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect","foldchange", "ci"), leftlabs=c("Study", "Log fold-change","Fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+
+
+#simple_plot
+
+pdf(file = "plot/Bacteroides3.PDF", width = 10, height = 5.1)
+forest(Bacteroides.dl, rightcols= FALSE, leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+
+#Changing position
+#pdf(file = "plot/Bacteroides2.PDF", width = 8, height = 6)
+#forest(Bacteroides.dl, rightcols=FALSE, rightlabs=FALSE, leftcols=c("studlab"), leftlabs=c("Study"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2, colgap.forest.left = unit(35,"mm"))
+
+
+#showing only log fold change
+#pdf(file = "plot/Bacteroides2.PDF", width = 8, height = 5.1)
+#forest(Bacteroides.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="grey", digits=2)
+
+```
+
+```{r conducting inverse variance meta analysis_Enterococcus }
+Enterococcus.dl <- metagen(logEffectSize,logStandardError,data=metase, subset = genus == "Enterococcus", byvar = Disease, studlab=paste(Authoryear), comb.fixed = FALSE, comb.random = TRUE, hakn = FALSE, prediction=FALSE, print.byvar = FALSE, sm="")
+
+pdf("plot/Enterococcus2.PDF", width = 10, height = 5.1)
+forest(Enterococcus.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect","foldchange", "ci"), leftlabs=c("Study", "Log fold-change","Fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#simple_plot
+pdf(file = "plot/Enterococcus3.PDF", width = 10, height = 5.1)
+forest(Enterococcus.dl, rightcols= FALSE, leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+
+#showing only log fold change
+#pdf("plot/Enterococcus.PDF", width = 8, height = 5.1)
+#forest(Enterococcus.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="grey", digits=2)
+```
+
+```{r conducting inverse variance meta analysis_Parabacteroides}
+Parabacteroides.dl <- metagen(logEffectSize,logStandardError,data=metase, subset = genus == "Parabacteroides", byvar = Disease, studlab=paste(Authoryear), comb.fixed = FALSE, comb.random = TRUE, hakn = FALSE, prediction=FALSE, print.byvar = FALSE, sm="")
+
+pdf("plot/Parabacteroides2.PDF", width = 10, height = 4.5)
+forest(Parabacteroides.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect","foldchange", "ci"), leftlabs=c("Study", "Log fold-change", "Fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#simple_plot
+pdf(file = "plot/Parabacteroides3.PDF", width = 10, height = 4.5)
+forest(Parabacteroides.dl, rightcols= FALSE, leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#showing only log fold change
+#pdf("plot/Parabacteroides.PDF", width = 8, height = 4.5)
+#forest(Parabacteroides.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="grey", digits=2)
+```
+
+```{r conducting inverse variance meta analysis_Odoribacter}
+Odoribacter.dl <- metagen(logEffectSize,logStandardError,data=metase, subset = genus == "Odoribacter", byvar = Disease, studlab=paste(Authoryear), comb.fixed = FALSE, comb.random = TRUE, hakn = FALSE, prediction=FALSE, print.byvar = FALSE, sm="")
+
+pdf("plot/Odoribacter2.PDF", width = 10, height = 4.1)
+forest(Odoribacter.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect","foldchange", "ci"), leftlabs=c("Study", "Log fold-change", "Fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#simple_plot
+pdf(file = "plot/Odoribacter3.PDF", width = 10, height = 4.1)
+forest(Odoribacter.dl, rightcols= FALSE, leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#showing only log fold change
+#pdf("plot/Odoribacter.PDF", width = 8, height = 4.1)
+#forest(Odoribacter.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+```
+
+```{r conducting inverse variance meta analysis_Akkermansia}
+Akkermansia.dl <- metagen(logEffectSize,logStandardError,data=metase, subset = genus == "Akkermansia", byvar = Disease, studlab=paste(Authoryear), comb.fixed = FALSE, comb.random = TRUE, hakn = FALSE, prediction=FALSE, print.byvar = FALSE,sm="")
+
+
+pdf("plot/Akkermansia2.PDF", width = 10, height = 4.1)
+forest(Akkermansia.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "foldchange", "ci"), leftlabs=c("Study", "Log fold-change", "Fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+
+#simple_plot
+pdf(file = "plot/Akkermansia3.PDF", width = 10, height = 4.1)
+forest(Akkermansia.dl, rightcols= FALSE, leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#showing only log fold change
+#pdf("plot/Akkermansia.PDF", width = 8, height = 4.1)
+#forest(Akkermansia.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+```
+
+```{r conducting inverse variance meta analysis_Klebsiella}
+Klebsiella.dl <- metagen(logEffectSize,logStandardError,data=metase, subset = genus == "Klebsiella", byvar = Disease, studlab=paste(Authoryear), comb.fixed = FALSE, comb.random = TRUE, hakn = FALSE, prediction=FALSE,print.byvar = FALSE, sm="")
+
+
+pdf("plot/Klebsiella2.PDF", width = 10, height = 4.5)
+forest(Klebsiella.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect","foldchange", "ci"), leftlabs=c("Study", "Log fold-change", "Fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+
+#simple_plot
+pdf(file = "plot/Klebsiella3.PDF", width = 10, height = 4.5)
+forest(Klebsiella.dl, rightcols= FALSE, leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#showing only log fold change
+#pdf("plot/Klebsiella.PDF", width = 8, height = 4.5)
+#forest(Klebsiella.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+```
+
+```{r conducting inverse variance meta analysis_Fusobacterium}
+Fusobacterium.dl <- metagen(logEffectSize,logStandardError,data=metase, subset = genus == "Fusobacterium", byvar = Disease, studlab=paste(Authoryear), comb.fixed = FALSE, comb.random = TRUE, hakn = FALSE, prediction=FALSE, print.byvar = FALSE,sm="")
+
+
+pdf("plot/Fusobacterium2.PDF", width = 10, height = 4.5)
+forest(Fusobacterium.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "foldchange", "ci"), leftlabs=c("Study", "Log fold-change", "Fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+
+#simple_plot
+pdf(file = "plot/Fusobacterium3.PDF", width = 10, height = 4.5)
+forest(Fusobacterium.dl, rightcols= FALSE, leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#showing only log fold change
+#pdf("plot/Fusobacterium.PDF", width = 8, height = 4.5)
+#forest(Fusobacterium.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+```
+
+```{r conducting inverse variance meta analysis_Blautia}
+Blautia.dl <- metagen(logEffectSize,logStandardError,data=metase, subset = genus == "Blautia", byvar = Disease, studlab=paste(Authoryear), comb.fixed = FALSE, comb.random = TRUE, hakn = FALSE, prediction=FALSE,print.byvar = FALSE, sm="")
+
+pdf("plot/Blautia2.PDF", width = 10, height = 4)
+forest(Blautia.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "foldchange", "ci"), leftlabs=c("Study", "Log fold-change","Fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#simple_plot
+pdf(file = "plot/Blautia2.PDF", width = 10, height = 4)
+forest(Blautia.dl, rightcols= FALSE, leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#showing only log fold change
+#pdf("plot/Blautia.PDF", width = 8, height = 4)
+#forest(Blautia.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+```
+
+```{r conducting inverse variance meta analysis_Eggerthella}
+Eggerthella.dl <- metagen(logEffectSize,logStandardError,data=metase, subset = genus == "Eggerthella", byvar = Disease, studlab=paste(Authoryear), comb.fixed = FALSE, comb.random = TRUE, hakn = FALSE, prediction=FALSE, print.byvar = FALSE, sm="")
+
+
+pdf("plot/Eggerthella2.PDF", width = 10, height = 4)
+forest(Eggerthella.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect","foldchange", "ci"), leftlabs=c("Study", "Log fold-change", "Fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+
+#simple_plot
+pdf(file = "plot/Eggerthella3.PDF", width = 10, height = 4)
+forest(Eggerthella.dl, rightcols= FALSE, leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+
+#showing only log fold change
+#pdf("plot/Eggerthella.PDF", width = 8, height = 4)
+#forest(Eggerthella.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+```
+
+```{r conducting inverse variance meta analysis_Peptostreptococcus}
+Peptostreptococcus.dl <- metagen(logEffectSize,logStandardError,data=metase, subset = genus == "Peptostreptococcus", byvar = Disease, studlab=paste(Authoryear), comb.fixed = FALSE, comb.random = TRUE, hakn = FALSE, prediction=FALSE, print.byvar = FALSE, sm="")
+
+
+pdf("plot/Peptostreptococcus2.PDF", width = 10, height = 4)
+forest(Peptostreptococcus.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "foldchange", "ci"), leftlabs=c("Study", "Log fold-change", "Fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+
+#simple_plot
+pdf(file = "plot/Peptostreptococcus3.PDF", width = 10, height = 4)
+forest(Peptostreptococcus.dl, rightcols= FALSE, leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+
+#showing only log fold change
+#pdf("plot/Peptostreptococcus.PDF", width = 8, height = 4)
+#forest(Peptostreptococcus.dl, rightcols=c("w.random"), rightlabs=c("Weights"), leftcols=c("studlab", "effect", "ci"), leftlabs=c("Study", "Log fold-change", "95% CI"), xlab="Log fold-change", col.square="navy", col.diamond="maroon", col.by="gray38", digits=2)
+```
+## Including Plots
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
